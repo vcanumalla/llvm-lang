@@ -1,4 +1,4 @@
-#include "llvm-lang/include/lexer.h"
+#include "../include/lexer.h"
 
 static int gettok() {
   static int lastChar = ' ';
