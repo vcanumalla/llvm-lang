@@ -7,7 +7,7 @@ static int gettok() {
   while (isspace(lastChar)) {
     lastChar = getchar();
   }
-  bool seenDecimal = (lastChar == '.');
+  bool seenDecimal = false;
   // get tokens that are more than one character with looper
   // alphanumeric tokens [a-zA-Z][a-zA-Z0-9]*
   if (isalpha(lastChar)) {
@@ -34,6 +34,7 @@ static int gettok() {
   
   if (isdigit(lastChar) || lastChar == '.') {
     while (isdigit(lastChar) || lastChar == '.') {
+      seenDecimal = (lastChar == '.') || seenDecimal;
       NumStr += lastChar;
       lastChar = getchar();
       if (seenDecimal && lastChar == '.') return SYNTAX_ERROR;

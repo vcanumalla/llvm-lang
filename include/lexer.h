@@ -19,6 +19,7 @@ enum Token {
   tok_identifier = -4,
   tok_num = -5
 };
+// string built up for identifier tokens
 static string IdentifierStr;
 static string NumStr;
 static double NumVal;
