@@ -73,3 +73,50 @@ static unique_ptr<ExprAST> parsePrimary() {
       return parseParenExpr();
   }
 }
+
+static int getTokPrecedence() {
+  if (!isascii(CurTok)) {
+    return -1;
+  }
+  int tokPrec = binopPrecedence[CurTok];
+  if (tokPrec <= 0) {
+    return -1;
+  }
+  return tokPrec;
+
+}
+
+static unique_ptr<ExprAST> parseExpression() {
+  auto lhs = parsePrimary();
+  if (!lhs) return nullptr;
+  return parseBinOpRHS(0, std::move(lhs));
+}
+
+static unique_ptr<ExprAST> parseBinOpRHS(int exprPrec,
+    unique_ptr<ExprAST> lhs) {
+      while (true) {
+        int tokPrec = getTokPrecedence();
+        // if the precedence is lower, evaluate the lower
+        if (tokPrec < exprPrec) {
+          return lhs;
+        }
+        int binOp = CurTok;
+        getNextToken();
+
+        auto rhs = parsePrimary();
+        if (!rhs) {
+          return nullptr;
+        }
+
+        int nextPrec = getTokPrecedence();
+        if (tokPrec < nextPrec) {
+          rhs = parseBinOpRHS(tokPrec+1, std::move(rhs));
+          if (!rhs) {
+            return nullptr;
+          }
+        }
+        lhs = std::make_unique<BinaryExprAST>(binOp, std::move(lhs), 
+            std::move(rhs));
+        
+      }
+}

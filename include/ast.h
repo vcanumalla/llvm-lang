@@ -26,11 +26,11 @@ class VariableExprAST : public ExprAST {
   VariableExprAST(const string& name) : name_(name) {};
 };
 
-class BinaryOpAST : public ExprAST {
+class BinaryExprAST : public ExprAST {
   char op_;
   unique_ptr<ExprAST> lhs_, rhs_;
  public:
-  BinaryOpAST(char op, unique_ptr<ExprAST> lhs, unique_ptr<ExprAST> rhs) : 
+  BinaryExprAST(char op, unique_ptr<ExprAST> lhs, unique_ptr<ExprAST> rhs) : 
       op_(op), lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
 };
 
