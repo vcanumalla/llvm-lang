@@ -1,22 +1,19 @@
 #include "../include/lexer.h"
 
-static int gettok() {
+int gettok() {
   static int lastChar = ' ';
 
   // Skip whitespace
   while (isspace(lastChar)) {
     lastChar = getchar();
   }
-  bool seenDecimal = false;
   // get tokens that are more than one character with looper
   // alphanumeric tokens [a-zA-Z][a-zA-Z0-9]*
   if (isalpha(lastChar)) {
     IdentifierStr = lastChar;
-    lastChar = getchar();
     // create the identifier
-    while (isalnum(lastChar)) {
+    while (isalnum((lastChar = getchar()))) {
       IdentifierStr += lastChar;
-      lastChar = getchar();
     }
 
     // for keywords, return the token value
@@ -34,10 +31,8 @@ static int gettok() {
   
   if (isdigit(lastChar) || lastChar == '.') {
     while (isdigit(lastChar) || lastChar == '.') {
-      seenDecimal = (lastChar == '.') || seenDecimal;
       NumStr += lastChar;
       lastChar = getchar();
-      if (seenDecimal && lastChar == '.') return SYNTAX_ERROR;
     }
     NumVal = strtod(NumStr.c_str(), 0);
     return tok_num;

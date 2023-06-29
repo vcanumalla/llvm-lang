@@ -59,6 +59,8 @@ static unique_ptr<ExprAST> parseIdentifierExpr() {
       getNextToken();
     }
   }
+  getNextToken();
+  return std::make_unique<CallExprAST>(idName, std::move(args));
 }
 
 static unique_ptr<ExprAST> parsePrimary() {
@@ -119,4 +121,83 @@ static unique_ptr<ExprAST> parseBinOpRHS(int exprPrec,
             std::move(rhs));
         
       }
+}
+
+static unique_ptr<PrototypeAST> parsePrototype() {
+  if (CurTok != tok_identifier) {
+    return logErrorP("Expected function name in prototype");
+  }
+
+  string fnName = IdentifierStr;
+  getNextToken();
+
+  if (CurTok != '(') {
+    return logErrorP("Expected '(' in prototype");
+  }
+  vector<string> argNames;
+
+  while (getNextToken() == tok_identifier) {
+    argNames.push_back(IdentifierStr);
+  }
+
+  if (CurTok != ')') {
+    return logErrorP("Expected ')' in prototype");
+  }
+
+  getNextToken();
+
+  return std::make_unique<PrototypeAST>(fnName, std::move(argNames));
+}
+
+static unique_ptr<FunctionAST> parseDefinition() {
+  getNextToken();
+  auto proto = parsePrototype();
+  if (!proto) {
+    return nullptr;
+  }
+  if (auto E = parseExpression()) {
+    return std::make_unique<FunctionAST>(std::move(proto), std::move(E));
+  }
+  return nullptr;
+}
+
+static std::unique_ptr<PrototypeAST> parseExtern() {
+  getNextToken();
+  return parsePrototype();
+}
+
+static std::unique_ptr<FunctionAST> parseTopLevelExpr() {
+  if (auto E = parseExpression()) {
+    auto proto = std::make_unique<PrototypeAST>("__anon_expr", vector<string>());
+    return std::make_unique<FunctionAST>(std::move(proto), std::move(E));
+  }
+  return nullptr;
+}
+
+void handleDefinition() {
+  if (parseDefinition()) {
+    fprintf(stderr, "Parsed a function definition.\n");
+  } else {
+    // Skip token for error recovery.
+    getNextToken();
+  }
+}
+
+void handleExtern() {
+  if (parseExtern()) {
+    fprintf(stderr, "Parsed an extern\n");
+  } else {
+    // Skip token for error recovery.
+    getNextToken();
+  }
+}
+
+void handleTopLevelExpression() {
+  // Evaluate a top-level expression into an anonymous function.
+  if (parseTopLevelExpr()) {
+    fprintf(stderr, "Parsed a top-level expr\n");
+  } else {
+    // Skip token for error recovery.
+    getNextToken();
+  }
 }
