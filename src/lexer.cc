@@ -1,4 +1,8 @@
-#include "../include/lexer.h"
+#include "lexer/lexer.h"
+#include "lexer/token.h"
+int CurTok;
+std::string IdentifierStr;
+double NumVal;
 
 int gettok() {
   static int lastChar = ' ';
@@ -30,18 +34,22 @@ int gettok() {
   //numeric tokens [0-9.]+ (numbers followed by dot followed by numbers)
   
   if (isdigit(lastChar) || lastChar == '.') {
-    while (isdigit(lastChar) || lastChar == '.') {
+    std::string NumStr;
+    do {
       NumStr += lastChar;
       lastChar = getchar();
-    }
+    } while (isdigit(lastChar) || lastChar == '.');
+
+    // Convert numeric string to numeric value
+    // that we are store in NumVal
     NumVal = strtod(NumStr.c_str(), 0);
-    return tok_num;
+    return tok_number;
   }
   if (lastChar == '#') {
     while (lastChar != EOF && lastChar != '\n' && lastChar != '\r') {
       lastChar = getchar();
     }
-    if (lastChar == EOF) {
+    if (lastChar != EOF) {
       return gettok();
     }
   }
@@ -51,4 +59,8 @@ int gettok() {
   int thisChar = lastChar;
   lastChar = getchar();
   return thisChar;
+}
+
+int getNextToken() {
+  return CurTok = gettok();
 }
